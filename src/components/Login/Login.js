@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useContext } from 'react';
+import React, { useState, useEffect, useReducer, useContext, useRef } from 'react';
 
 import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
@@ -11,7 +11,7 @@ const emailReducer = (state, action) => {
     return { value: action.val, isValid: action.val.includes('@') };
   }
   if (action.type === 'INPUT_BLUR') {
-    return { value: state.value, isValid: state.value.includes('@') }; 
+    return { value: state.value, isValid: state.value.includes('@') };
   }
   return { value: '', isValid: false };
 };
@@ -21,7 +21,7 @@ const passwordReducer = (state, action) => {
     return { value: action.val, isValid: action.val.length > 6 };
   }
   if (action.type === 'INPUT_BLUR') {
-    return { value: state.value, isValid: state.value.trim().length > 6 }; 
+    return { value: state.value, isValid: state.value.trim().length > 6 };
   }
   return { value: '', isValid: false };
 };
@@ -35,15 +35,17 @@ const Login = (props) => {
 
   const [emailState, dispatchEmail] = useReducer(emailReducer, {
     value: '',
-    isValid: null 
+    isValid: null
   });
 
   const [passwordState, dispatchPassword] = useReducer(passwordReducer, {
     value: '',
-    isValid: null 
+    isValid: null
   });
 
   const authCtx = useContext(AuthContext);
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
 
   // pulling out the validity state to be used in useEffect
   // this way useEffect will not run when the value changes only when validity changes
@@ -57,11 +59,11 @@ const Login = (props) => {
     const identifier = setTimeout(() => {
       console.log('checking form validity!');
       setFormIsValid(
-        emailIsValid && passwordIsValid 
+        emailIsValid && passwordIsValid
       );
     }, 500);
 
-    
+
     // this is a cleanup function that clears the previous timer on each execution
     // in practice this means the use effect function will only run after the user
     // has stopped typing for 500 ms
@@ -97,13 +99,22 @@ const Login = (props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    authCtx.onLogin(emailState.value, passwordState.value);
+    if (formIsValid) {
+      authCtx.onLogin(emailState.value, passwordState.value);
+    }
+    else if (!emailIsValid) {
+      emailInputRef.current.focus();
+    }
+    else {
+      passwordInputRef.current.focus();
+    }
   };
 
   return (
     <Card className={classes.login}>
       <form onSubmit={submitHandler}>
         <Input
+        	ref={emailInputRef}
           id="email"
           label="E-mail"
           type="email"
@@ -113,6 +124,7 @@ const Login = (props) => {
           onBlur={validateEmailHandler}
         />
         <Input
+        	ref={passwordInputRef}
           id="password"
           label="Password"
           type="password"
@@ -122,7 +134,7 @@ const Login = (props) => {
           onBlur={validatePasswordHandler}
         />
         <div className={classes.actions}>
-          <Button type="submit" className={classes.btn} disabled={!formIsValid}>
+          <Button type="submit" className={classes.btn} >
             Login
           </Button>
         </div>
