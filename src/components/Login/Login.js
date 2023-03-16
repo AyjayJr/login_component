@@ -25,10 +25,10 @@ const passwordReducer = (state, action) => {
 };
 
 const Login = (props) => {
-  const [enteredEmail, setEnteredEmail] = useState('');
-  const [emailIsValid, setEmailIsValid] = useState();
-  const [enteredPassword, setEnteredPassword] = useState('');
-  const [passwordIsValid, setPasswordIsValid] = useState();
+  // const [enteredEmail, setEnteredEmail] = useState('');
+  // const [emailIsValid, setEmailIsValid] = useState();
+  // const [enteredPassword, setEnteredPassword] = useState('');
+  // const [passwordIsValid, setPasswordIsValid] = useState();
   const [formIsValid, setFormIsValid] = useState(false);
 
   const [emailState, dispatchEmail] = useReducer(emailReducer, {
@@ -41,40 +41,46 @@ const Login = (props) => {
     isValid: null 
   });
 
+  // pulling out the validity state to be used in useEffect
+  // this way useEffect will not run when the value changes only when validity changes
+  const { isValid: emailIsValid } = emailState;
+  const { isValid: passwordIsValid } = passwordState;
+
   // as a rule of thumb the dependencies for useEffect are whatever you
   // are using in the arrow function 3.g. setFormIsvalid, enteredEmail, and enteredPassword
   // in this case the setFormIsValid never changes so you omit it
-  // useEffect(() => {
-  //   const identifier = setTimeout(() => {
-  //     setFormIsValid(
-  //       enteredEmail.includes('@') && enteredPassword.trim().length > 6
-  //     );
-  //   }, 500);
+  useEffect(() => {
+    const identifier = setTimeout(() => {
+      console.log('checking form validity!');
+      setFormIsValid(
+        emailIsValid && passwordIsValid 
+      );
+    }, 500);
 
     
-  //   // this is a cleanup function that clears the previous timer on each execution
-  //   // in practice this means the use effect function will only run after the user
-  //   // has stopped typing for 500 ms
-  //   return () => {
-  //     console.log('CLEANUP');
-  //     clearTimeout(identifier);
-  //   };
-  // }, [enteredPassword, enteredEmail])
+    // this is a cleanup function that clears the previous timer on each execution
+    // in practice this means the use effect function will only run after the user
+    // has stopped typing for 500 ms
+    return () => {
+      console.log('CLEANUP');
+      clearTimeout(identifier);
+    };
+  }, [emailIsValid, passwordIsValid])
 
   const emailChangeHandler = (event) => {
     dispatchEmail({ type: 'USER_INPUT', val: event.target.value })
 
-    setFormIsValid(
-      emailState.isValid && passwordState.isValid
-    );
+    // setFormIsValid(
+    //   event.target.value.includes('@') && passwordState.isValid
+    // );
   };
 
   const passwordChangeHandler = (event) => {
     dispatchPassword({ type: 'USER_INPUT', val: event.target.value })
 
-    setFormIsValid(
-      emailState.isValid && passwordState.isValid
-    );
+    // setFormIsValid(
+    //   emailState.isValid && event.target.value.trim().length > 6 
+    // );
   };
 
   const validateEmailHandler = () => {
