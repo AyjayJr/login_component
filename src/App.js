@@ -34,7 +34,12 @@ function App() {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn: isLoggedIn }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn: isLoggedIn,
+        onLogout: logoutHandler
+        }}
+    >
       {/* must wrap all the components that plan to use a context with a .Provider */}
       <MainHeader onLogout={logoutHandler} />
       <main>
